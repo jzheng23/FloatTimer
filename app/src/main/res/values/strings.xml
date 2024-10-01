@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">QuickLock</string>
-    <string name="device_admin_description">This app needs device admin permission to lock the screen when the floating button is pressed.</string>
+    <string name="accessibility_service_description">Screen Lock Service</string>
 </resources>
