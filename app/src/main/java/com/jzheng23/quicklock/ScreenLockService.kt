@@ -1,10 +1,12 @@
-package com.example.quicklock
+package com.jzheng23.quicklock
 
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 
@@ -12,17 +14,24 @@ class ScreenLockService : AccessibilityService() {
 
     private val lockScreenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "com.example.quicklock.LOCK_SCREEN") {
+            if (intent?.action == "com.jzheng23.quicklock.LOCK_SCREEN") {
                 Log.d("ScreenLockService", "Lock screen broadcast received")
                 lockScreen()
             }
         }
     }
 
+    @SuppressLint("InlinedApi")
     override fun onCreate() {
         super.onCreate()
-        registerReceiver(lockScreenReceiver, IntentFilter("com.example.quicklock.LOCK_SCREEN"),
-            RECEIVER_NOT_EXPORTED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(lockScreenReceiver, IntentFilter("com.jzheng23.quicklock.LOCK_SCREEN"),
+                RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(lockScreenReceiver, IntentFilter("com.jzheng23.quicklock.LOCK_SCREEN"),
+                Context.RECEIVER_EXPORTED
+            )
+        }
     }
 
     override fun onDestroy() {

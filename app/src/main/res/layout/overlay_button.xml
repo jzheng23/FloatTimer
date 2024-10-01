@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.quicklock.DraggableFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.jzheng23.quicklock.DraggableFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dragHandle"
     android:layout_width="56dp"
     android:layout_height="56dp"

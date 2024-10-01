@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.quicklock"
+    namespace = "com.jzheng23.quicklock"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.quicklock"
-        minSdk = 34
+        applicationId = "com.jzheng23.quicklock"
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

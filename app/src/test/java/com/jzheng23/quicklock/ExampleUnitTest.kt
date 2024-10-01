@@ -1,4 +1,4 @@
-package com.example.quicklock
+package com.jzheng23.quicklock
 
 import org.junit.Test
 

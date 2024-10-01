@@ -1,4 +1,4 @@
-package com.example.quicklock
+package com.jzheng23.quicklock
 
 import android.app.Service
 import android.content.Context
@@ -99,7 +99,7 @@ class OverlayService : Service() {
     }
 
     private fun lockScreen() {
-        val intent = Intent("com.example.quicklock.LOCK_SCREEN")
+        val intent = Intent("com.jzheng23.quicklock.LOCK_SCREEN")
         intent.setPackage(packageName)
         sendBroadcast(intent)
         Log.d("OverlayService", "Lock screen broadcast sent")

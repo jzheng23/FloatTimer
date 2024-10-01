@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">QuickLock</string>
     <string name="accessibility_service_description">Screen Lock Service</string>
-    <string name="lock">Lock</string>
-    <string name="lock1">Lock</string>
 </resources>
