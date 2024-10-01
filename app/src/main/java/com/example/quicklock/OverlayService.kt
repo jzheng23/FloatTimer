@@ -5,13 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.FrameLayout
 import kotlin.math.abs
 
@@ -26,7 +26,6 @@ class OverlayService : Service() {
     private var initialY: Int = 0
     private var initialTouchX: Float = 0f
     private var initialTouchY: Float = 0f
-    private var isMoved = false
 
     override fun onCreate() {
         super.onCreate()
@@ -45,8 +44,8 @@ class OverlayService : Service() {
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, rootView, true)
 
-        val dragHandle = overlayView?.findViewById<View>(R.id.dragHandle)
-
+        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
+        var isMoved = false
 
         dragHandle?.setOnTouchListener { view, event ->
             when (event.action) {
@@ -72,15 +71,12 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     if (!isMoved) {
                         view.performClick()
+                        lockScreen() // Call lockScreen() function here
                     }
                     true
                 }
                 else -> false
             }
-        }
-
-        overlayView?.findViewById<Button>(R.id.lockButton)?.setOnClickListener {
-            lockScreen()
         }
 
         params = WindowManager.LayoutParams(
@@ -129,7 +125,11 @@ class OverlayService : Service() {
     }
 }
 
-class DraggableFrameLayout(context: Context) : FrameLayout(context) {
+class DraggableFrameLayout : FrameLayout {
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
     override fun performClick(): Boolean {
         super.performClick()
         return true
