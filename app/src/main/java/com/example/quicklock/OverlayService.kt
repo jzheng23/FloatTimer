@@ -1,19 +1,32 @@
 package com.example.quicklock
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.FrameLayout
+import kotlin.math.abs
 
 class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
+
+    private lateinit var params: WindowManager.LayoutParams
+
+    // Declare these properties at the class level
+    private var initialX: Int = 0
+    private var initialY: Int = 0
+    private var initialTouchX: Float = 0f
+    private var initialTouchY: Float = 0f
+    private var isMoved = false
 
     override fun onCreate() {
         super.onCreate()
@@ -28,15 +41,49 @@ class OverlayService : Service() {
     }
 
     private fun showOverlay() {
-        // Create the overlay view using LayoutInflater
-        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, null)
+        val rootView = FrameLayout(this)
 
-        // Set up the lock button click listener
+        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, rootView, true)
+
+        val dragHandle = overlayView?.findViewById<View>(R.id.dragHandle)
+
+
+        dragHandle?.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    isMoved = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = (event.rawX - initialTouchX).toInt()
+                    val deltaY = (event.rawY - initialTouchY).toInt()
+                    if (abs(deltaX) > 5 || abs(deltaY) > 5) {
+                        isMoved = true
+                        params.x = initialX + deltaX
+                        params.y = initialY + deltaY
+                        windowManager.updateViewLayout(rootView, params)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (!isMoved) {
+                        view.performClick()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+
         overlayView?.findViewById<Button>(R.id.lockButton)?.setOnClickListener {
             lockScreen()
         }
 
-        val params = WindowManager.LayoutParams(
+        params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -49,9 +96,8 @@ class OverlayService : Service() {
         }
 
         try {
-            windowManager.addView(overlayView, params)
+            windowManager.addView(rootView, params)
         } catch (e: IllegalStateException) {
-            // View is already added, log the error or handle it as needed
             e.printStackTrace()
         }
     }
@@ -80,5 +126,12 @@ class OverlayService : Service() {
             }
             overlayView = null
         }
+    }
+}
+
+class DraggableFrameLayout(context: Context) : FrameLayout(context) {
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
     }
 }
