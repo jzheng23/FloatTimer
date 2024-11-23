@@ -55,7 +55,7 @@ class OverlayService : Service() {
         val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
 
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
-        dragHandle?.setBackgroundResource(R.drawable.taiji)
+        dragHandle?.setBackgroundResource(R.drawable.round_button)
 //        (dragHandle?.background as? VectorDrawable)?.setTintList(
 //            ColorStateList.valueOf(Color(
 //                alpha = 153,  // 60% opacity (0x99)
