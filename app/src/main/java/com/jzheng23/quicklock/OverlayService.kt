@@ -3,7 +3,9 @@ package com.jzheng23.quicklock
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.PixelFormat
+import android.graphics.drawable.VectorDrawable
 import android.os.IBinder
 import android.util.AttributeSet
 import android.util.Log
@@ -13,6 +15,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import kotlin.math.abs
 
 class OverlayService : Service() {
@@ -44,9 +48,22 @@ class OverlayService : Service() {
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, rootView, true)
 
-        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
-        var isMoved = false
+                var isMoved = false
 
+        // Add these lines:
+        // In OverlayService.kt, in showOverlay() function:
+        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
+
+        overlayView?.setBackgroundColor(Color.Transparent.toArgb())
+        dragHandle?.setBackgroundResource(R.drawable.taiji)
+//        (dragHandle?.background as? VectorDrawable)?.setTintList(
+//            ColorStateList.valueOf(Color(
+//                alpha = 153,  // 60% opacity (0x99)
+//                red = 255,    // Using light gray instead of pure black
+//                green = 255,  // for better visibility on dark backgrounds
+//                blue = 255
+//            ).toArgb()))
+//
         dragHandle?.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {

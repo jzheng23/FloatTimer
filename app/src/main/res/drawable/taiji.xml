@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="56dp"
+    android:viewportWidth="80"
+    android:viewportHeight="80">
+
+    <!-- Main circle -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M40,1A39,39 0 1,1 40,79A39,39 0 1,1 40,1"/>
+
+    <!-- White half with curve -->
+    <path
+        android:fillColor="#99FFFFFF"
+        android:pathData="M40,2a38,38 0 0 1 0,76a19,19 0 0 1 0,-38a19,19 0 0 0 0,-38"/>
+
+    <!-- White dot -->
+    <path
+        android:fillColor="#99FFFFFF"
+        android:pathData="M40,21m-5,0a5,5 0 1,0 10,0a5,5 0 1,0 -10,0"/>
+
+    <!-- Black dot -->
+    <path
+        android:fillColor="#66000000"
+        android:pathData="M40,59m-5,0a5,5 0 1,0 10,0a5,5 0 1,0 -10,0"/>
+</vector>
