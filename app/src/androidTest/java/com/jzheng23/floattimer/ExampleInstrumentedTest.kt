@@ -1,4 +1,4 @@
-package com.jzheng23.quicklock
+package com.jzheng23.floattimer
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

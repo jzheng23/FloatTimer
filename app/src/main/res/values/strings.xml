@@ -1,5 +1,3 @@
 <resources>
-    <string name="app_name">QuickLock</string>
-    <string name="accessibility_service_description">Screen Lock Service</string>
-    <string name="permission_description">The app needs two permissions to work properly: Overlay Service to display the floating button, and Accessibility Service to lock the screen.</string>
+    <string name="app_name">FloatTimer</string>
 </resources>

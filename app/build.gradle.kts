@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.jzheng23.quicklock"
+    namespace = "com.jzheng23.floattimer"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.jzheng23.quicklock"
+        applicationId = "com.jzheng23.floattimer"
         minSdk = 28
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 1
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

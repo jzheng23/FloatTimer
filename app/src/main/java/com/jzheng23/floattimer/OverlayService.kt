@@ -1,14 +1,11 @@
-package com.jzheng23.quicklock
+package com.jzheng23.floattimer
 
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.PixelFormat
-import android.graphics.drawable.VectorDrawable
 import android.os.IBinder
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -48,7 +45,7 @@ class OverlayService : Service() {
 
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, rootView, true)
 
-                var isMoved = false
+        var isMoved = false
 
         // Add these lines:
         // In OverlayService.kt, in showOverlay() function:
@@ -56,14 +53,9 @@ class OverlayService : Service() {
 
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
         dragHandle?.setBackgroundResource(R.drawable.round_button)
-//        (dragHandle?.background as? VectorDrawable)?.setTintList(
-//            ColorStateList.valueOf(Color(
-//                alpha = 153,  // 60% opacity (0x99)
-//                red = 255,    // Using light gray instead of pure black
-//                green = 255,  // for better visibility on dark backgrounds
-//                blue = 255
-//            ).toArgb()))
-//
+//        dragHandle?.setBackgroundResource(R.drawable.taiji)
+
+
         dragHandle?.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -74,6 +66,7 @@ class OverlayService : Service() {
                     isMoved = false
                     true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     val deltaX = (event.rawX - initialTouchX).toInt()
                     val deltaY = (event.rawY - initialTouchY).toInt()
@@ -85,13 +78,15 @@ class OverlayService : Service() {
                     }
                     true
                 }
+
                 MotionEvent.ACTION_UP -> {
                     if (!isMoved) {
                         view.performClick()
-                        lockScreen() // Call lockScreen() function here
+//                        lockScreen() // Call lockScreen() function here
                     }
                     true
                 }
+
                 else -> false
             }
         }
@@ -113,13 +108,6 @@ class OverlayService : Service() {
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
-    }
-
-    private fun lockScreen() {
-        val intent = Intent("com.jzheng23.quicklock.LOCK_SCREEN")
-        intent.setPackage(packageName)
-        sendBroadcast(intent)
-        Log.d("OverlayService", "Lock screen broadcast sent")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -145,7 +133,11 @@ class OverlayService : Service() {
 class DraggableFrameLayout : FrameLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     override fun performClick(): Boolean {
         super.performClick()

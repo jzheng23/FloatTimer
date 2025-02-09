@@ -1,4 +1,4 @@
-package com.jzheng23.quicklock
+package com.jzheng23.floattimer
 
 import org.junit.Test
 

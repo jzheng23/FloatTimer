@@ -1,4 +1,4 @@
-package com.jzheng23.quicklock.ui.theme
+package com.jzheng23.floattimer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
