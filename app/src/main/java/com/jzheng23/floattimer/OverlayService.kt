@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import kotlin.math.abs
@@ -19,6 +20,7 @@ import kotlin.math.abs
 class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
+    private var timerTextView: TextView? = null
 
     private lateinit var params: WindowManager.LayoutParams
 
@@ -27,6 +29,7 @@ class OverlayService : Service() {
     private var initialY: Int = 0
     private var initialTouchX: Float = 0f
     private var initialTouchY: Float = 0f
+    private var numberInBubble = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -50,6 +53,7 @@ class OverlayService : Service() {
         // Add these lines:
         // In OverlayService.kt, in showOverlay() function:
         val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
+        timerTextView = overlayView?.findViewById(R.id.timerText)
 
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
         dragHandle?.setBackgroundResource(R.drawable.round_button)
@@ -82,7 +86,8 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     if (!isMoved) {
                         view.performClick()
-//                        lockScreen() // Call lockScreen() function here
+                        numberInBubble++
+                        timerTextView?.text = String.format(numberInBubble.toString())
                     }
                     true
                 }

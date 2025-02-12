@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="99"
-        android:textColor="#33000000"
+        android:textColor="#44888888"
         android:textSize="24sp"/>
 
 </com.jzheng23.floattimer.DraggableFrameLayout>
