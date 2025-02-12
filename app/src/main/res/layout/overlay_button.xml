@@ -2,5 +2,20 @@
 <com.jzheng23.floattimer.DraggableFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dragHandle"
     android:layout_width="56dp"
-    android:layout_height="56dp"
-    android:background="@drawable/round_button" />
+    android:layout_height="56dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/round_button" />
+
+    <TextView
+        android:id="@+id/timerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="99"
+        android:textColor="#33000000"
+        android:textSize="24sp"/>
+
+</com.jzheng23.floattimer.DraggableFrameLayout>
