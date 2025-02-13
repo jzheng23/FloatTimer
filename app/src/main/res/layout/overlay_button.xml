@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.jzheng23.floattimer.DraggableFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dragHandle"
-    android:layout_width="56dp"
-    android:layout_height="56dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <View
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="99"
-        android:textColor="#44888888"
+        android:textColor="#88888888"
         android:textSize="24sp"/>
 
 </com.jzheng23.floattimer.DraggableFrameLayout>

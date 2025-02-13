@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import kotlin.math.abs
 
 class OverlayService : Service() {
@@ -30,6 +31,8 @@ class OverlayService : Service() {
     private var initialTouchX: Float = 0f
     private var initialTouchY: Float = 0f
     private var numberInBubble = 0
+    private var buttonSize = DEFAULT_BUTTON_SIZE
+    private var rootView: FrameLayout? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -37,28 +40,62 @@ class OverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        buttonSize = intent?.getIntExtra("BUTTON_SIZE", Constants.DEFAULT_BUTTON_SIZE) ?: Constants.DEFAULT_BUTTON_SIZE
         if (overlayView == null) {
             showOverlay()
+        } else {
+            val sizeInPixels = Constants.dpToPx(this, buttonSize)
+            params.width = sizeInPixels
+            params.height = sizeInPixels
+            // Update root view size
+            rootView?.layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+
+            // Update drag handle size
+            overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.layoutParams =
+                FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+
+            timerTextView?.textSize = Constants.calculateTextSize(buttonSize)
+            // Update in window manager
+            rootView?.let { view ->
+                windowManager.updateViewLayout(view, params)
+            }
         }
         return START_STICKY
     }
 
     private fun showOverlay() {
-        val rootView = FrameLayout(this)
+        val sizeInPixels = Constants.dpToPx(this, buttonSize)
 
-        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, rootView, true)
+        val newRootView = FrameLayout(this).apply {
+            layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+        }
 
-        var isMoved = false
+        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_button, newRootView, true)
 
-        // Add these lines:
-        // In OverlayService.kt, in showOverlay() function:
-        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)
-        timerTextView = overlayView?.findViewById(R.id.timerText)
+        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
+            layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+        }
+        timerTextView = overlayView?.findViewById<TextView>(R.id.timerText)?.apply {
+            textSize = Constants.calculateTextSize(buttonSize)
+        }
 
+        params = WindowManager.LayoutParams(
+            sizeInPixels,
+            sizeInPixels,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 100
+            y = 100
+        }
+
+        rootView = newRootView
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
         dragHandle?.setBackgroundResource(R.drawable.round_button)
-//        dragHandle?.setBackgroundResource(R.drawable.taiji)
 
+        var isMoved = false
 
         dragHandle?.setOnTouchListener { view, event ->
             when (event.action) {
@@ -96,25 +133,12 @@ class OverlayService : Service() {
             }
         }
 
-        params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 100
-        }
-
         try {
             windowManager.addView(rootView, params)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
     }
-
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {

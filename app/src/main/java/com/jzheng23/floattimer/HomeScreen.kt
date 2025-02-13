@@ -1,5 +1,6 @@
 package com.jzheng23.floattimer
 
+
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -21,10 +22,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,11 +38,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
+import com.jzheng23.floattimer.Constants.MAX_BUTTON_SIZE
+import com.jzheng23.floattimer.Constants.MIN_BUTTON_SIZE
+
 
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
+
 
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -79,17 +88,35 @@ fun HomeScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        OverlayButtonPreview()
+        Text(
+            "Button size: ${buttonSize.toInt()}dp",
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+
+        Slider(
+            value = buttonSize,
+            onValueChange = { buttonSize = it },
+            valueRange = MIN_BUTTON_SIZE.toFloat()..MAX_BUTTON_SIZE.toFloat(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+
+        OverlayButtonPreview(buttonSize = buttonSize.toInt())
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
                 if (overlayPermissionGranted) {
-                    context.startService(Intent(context, OverlayService::class.java))
+                    val intent = Intent(context, OverlayService::class.java).apply {
+                        putExtra("BUTTON_SIZE", buttonSize.toInt())
+                    }
+                    context.startService(intent)
                     // You might want to finish the activity here if needed
-                    val activity = context as? Activity
-                    activity?.moveTaskToBack(true)
+//                    val activity = context as? Activity
+//                    activity?.moveTaskToBack(true)
                 }
             },
             enabled = overlayPermissionGranted
@@ -118,7 +145,7 @@ fun PermissionSwitch(
     }
 }
 @Composable
-fun OverlayButtonPreview() {
+fun OverlayButtonPreview(buttonSize: Int = Constants.DEFAULT_BUTTON_SIZE) {
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -135,7 +162,7 @@ fun OverlayButtonPreview() {
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(buttonSize.dp)
                             .align(Alignment.Center)
                     ) {
                         Box(
@@ -154,8 +181,8 @@ fun OverlayButtonPreview() {
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0x44888888),
-                            fontSize = 24.sp
+                            color = Color(0x88888888),
+                            fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
                 }
@@ -170,7 +197,7 @@ fun OverlayButtonPreview() {
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(buttonSize.dp)
                             .align(Alignment.Center)
                     ) {
                         Box(
@@ -189,8 +216,8 @@ fun OverlayButtonPreview() {
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0xFF888888),
-                            fontSize = 24.sp
+                            color = Color(0x88888888),
+                            fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
                 }
