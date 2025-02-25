@@ -32,6 +32,7 @@ class OverlayService : Service() {
     private var initialTouchY: Float = 0f
     private var numberInBubble = 0
     private var buttonSize = DEFAULT_BUTTON_SIZE
+    private var buttonAlpha = 1f
     private var rootView: FrameLayout? = null
 
     override fun onCreate() {
@@ -40,7 +41,8 @@ class OverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        buttonSize = intent?.getIntExtra("BUTTON_SIZE", Constants.DEFAULT_BUTTON_SIZE) ?: Constants.DEFAULT_BUTTON_SIZE
+        buttonSize = intent?.getIntExtra("BUTTON_SIZE", DEFAULT_BUTTON_SIZE) ?: DEFAULT_BUTTON_SIZE
+        buttonAlpha = intent?.getFloatExtra("BUTTON_ALPHA", 1f) ?: 1f
         if (overlayView == null) {
             showOverlay()
         } else {
@@ -128,7 +130,6 @@ class OverlayService : Service() {
                     }
                     true
                 }
-
                 else -> false
             }
         }

@@ -59,6 +59,7 @@ fun HomeScreen() {
         if (overlayPermissionGranted) {
             val intent = Intent(context, OverlayService::class.java).apply {
                 putExtra("BUTTON_SIZE", buttonSize.toInt())
+                putExtra("BUTTON_ALPHA", buttonAlpha)
             }
             context.startService(intent)
         }
