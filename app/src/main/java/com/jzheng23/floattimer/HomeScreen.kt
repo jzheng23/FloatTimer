@@ -1,7 +1,6 @@
 package com.jzheng23.floattimer
 
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -48,7 +47,7 @@ fun HomeScreen() {
     val context = LocalContext.current
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
-
+    var buttonAlpha by remember { mutableFloatStateOf(1f) }
 
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -56,7 +55,14 @@ fun HomeScreen() {
         overlayPermissionGranted = Settings.canDrawOverlays(context)
     }
 
-
+    fun startOverlayService() {
+        if (overlayPermissionGranted) {
+            val intent = Intent(context, OverlayService::class.java).apply {
+                putExtra("BUTTON_SIZE", buttonSize.toInt())
+            }
+            context.startService(intent)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -96,29 +102,43 @@ fun HomeScreen() {
 
         Slider(
             value = buttonSize,
-            onValueChange = { buttonSize = it },
+            onValueChange = {
+                buttonSize = it
+                startOverlayService()
+            },
             valueRange = MIN_BUTTON_SIZE.toFloat()..MAX_BUTTON_SIZE.toFloat(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         )
 
-        OverlayButtonPreview(buttonSize = buttonSize.toInt())
+        // Transparency slider
+        Text(
+            "Button transparency: ${((1 - buttonAlpha) * 100).toInt()}%",
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        Slider(
+            value = buttonAlpha,
+            onValueChange = {
+                buttonAlpha = it
+                startOverlayService() // Update when slider changes
+            },
+            valueRange = 0.1f..1f, // From 10% visible to 100% visible
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+
+        OverlayButtonPreview(
+            buttonSize = buttonSize.toInt(),
+            buttonAlpha = buttonAlpha
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = {
-                if (overlayPermissionGranted) {
-                    val intent = Intent(context, OverlayService::class.java).apply {
-                        putExtra("BUTTON_SIZE", buttonSize.toInt())
-                    }
-                    context.startService(intent)
-                    // You might want to finish the activity here if needed
-//                    val activity = context as? Activity
-//                    activity?.moveTaskToBack(true)
-                }
-            },
+            onClick = { startOverlayService() },
             enabled = overlayPermissionGranted
         ) {
             Text("Start the floating button")
@@ -144,8 +164,12 @@ fun PermissionSwitch(
         )
     }
 }
+
 @Composable
-fun OverlayButtonPreview(buttonSize: Int = Constants.DEFAULT_BUTTON_SIZE) {
+fun OverlayButtonPreview(
+    buttonSize: Int = DEFAULT_BUTTON_SIZE,
+    buttonAlpha: Float = 1f
+) {
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -169,19 +193,19 @@ fun OverlayButtonPreview(buttonSize: Int = Constants.DEFAULT_BUTTON_SIZE) {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color(0x33888888),
+                                    color = Color(0x33888888).copy(alpha = 0.1f * buttonAlpha),
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x44888888),
+                                    color = Color(0x44888888).copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0x88888888),
+                            color = Color(0x88888888).copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
@@ -204,19 +228,19 @@ fun OverlayButtonPreview(buttonSize: Int = Constants.DEFAULT_BUTTON_SIZE) {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color(0x33888888),
+                                    color = Color(0x33888888).copy(alpha = 0.1f * buttonAlpha),
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x44888888),
+                                    color = Color(0x44888888).copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0x88888888),
+                            color = Color(0x88888888).copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
