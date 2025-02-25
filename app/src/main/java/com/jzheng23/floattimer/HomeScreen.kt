@@ -115,17 +115,17 @@ fun HomeScreen() {
 
         // Transparency slider
         Text(
-            "Button transparency: ${((1 - buttonAlpha) * 100).toInt()}%",
+            "Button transparency: ${((1-buttonAlpha) * 100).toInt()}%",
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(top = 16.dp)
         )
         Slider(
-            value = buttonAlpha,
+            value = 1 - buttonAlpha,
             onValueChange = {
-                buttonAlpha = it
+                buttonAlpha = 1 - it
                 startOverlayService() // Update when slider changes
             },
-            valueRange = 0.1f..1f, // From 10% visible to 100% visible
+            valueRange = 0f..1f, // From 10% visible to 100% visible
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -194,12 +194,12 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color(0x33888888).copy(alpha = 0.1f * buttonAlpha),
+                                    color = Color.Transparent,
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x44888888).copy(alpha = 0.4f * buttonAlpha),
+                                    color = Color(0x88888888).copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
@@ -229,12 +229,12 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color(0x33888888).copy(alpha = 0.1f * buttonAlpha),
+                                    color = Color.Transparent,
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x44888888).copy(alpha = 0.4f * buttonAlpha),
+                                    color = Color(0x88888888).copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )

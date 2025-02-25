@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FloatTimer</string>
+    <string name="default_value_in_icon">99</string>
 </resources>

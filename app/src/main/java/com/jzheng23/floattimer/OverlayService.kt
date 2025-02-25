@@ -52,11 +52,16 @@ class OverlayService : Service() {
             // Update root view size
             rootView?.layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
 
-            // Update drag handle size
-            overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.layoutParams =
-                FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+            overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
+                layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+                alpha = buttonAlpha // Add this line to update alpha
+            }
 
-            timerTextView?.textSize = Constants.calculateTextSize(buttonSize)
+            // Update text size and alpha
+            timerTextView?.apply {
+                textSize = Constants.calculateTextSize(buttonSize)
+                alpha = buttonAlpha // Add this line to update alpha
+            }
             // Update in window manager
             rootView?.let { view ->
                 windowManager.updateViewLayout(view, params)
@@ -76,9 +81,12 @@ class OverlayService : Service() {
 
         val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
             layoutParams = FrameLayout.LayoutParams(sizeInPixels, sizeInPixels)
+            alpha = buttonAlpha
         }
+
         timerTextView = overlayView?.findViewById<TextView>(R.id.timerText)?.apply {
             textSize = Constants.calculateTextSize(buttonSize)
+            alpha = buttonAlpha
         }
 
         params = WindowManager.LayoutParams(
@@ -96,6 +104,7 @@ class OverlayService : Service() {
         rootView = newRootView
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
         dragHandle?.setBackgroundResource(R.drawable.round_button)
+        dragHandle?.background?.alpha = (buttonAlpha * 255).toInt()
 
         var isMoved = false
 
@@ -130,6 +139,7 @@ class OverlayService : Service() {
                     }
                     true
                 }
+
                 else -> false
             }
         }
@@ -140,6 +150,7 @@ class OverlayService : Service() {
             e.printStackTrace()
         }
     }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
