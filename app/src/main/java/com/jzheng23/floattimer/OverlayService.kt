@@ -4,8 +4,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.os.IBinder
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -15,6 +17,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
 import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import kotlin.math.abs
 
@@ -33,6 +36,7 @@ class OverlayService : Service() {
     private var numberInBubble = 0
     private var buttonSize = DEFAULT_BUTTON_SIZE
     private var buttonAlpha = 1f
+    private var buttonColor = Color.Gray
     private var rootView: FrameLayout? = null
 
     override fun onCreate() {
@@ -43,6 +47,10 @@ class OverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         buttonSize = intent?.getIntExtra("BUTTON_SIZE", DEFAULT_BUTTON_SIZE) ?: DEFAULT_BUTTON_SIZE
         buttonAlpha = intent?.getFloatExtra("BUTTON_ALPHA", 1f) ?: 1f
+        val buttonColorInt =
+            intent?.getIntExtra("BUTTON_COLOR", Color.Gray.toArgb()) ?: Color.Gray.toArgb()
+        buttonColor = Color(buttonColorInt)
+
         if (overlayView == null) {
             showOverlay()
         } else {
@@ -61,7 +69,11 @@ class OverlayService : Service() {
             timerTextView?.apply {
                 textSize = Constants.calculateTextSize(buttonSize)
                 alpha = buttonAlpha // Add this line to update alpha
+                setTextColor(buttonColor.toArgb())
             }
+
+//            updateButtonBorder()
+
             // Update in window manager
             rootView?.let { view ->
                 windowManager.updateViewLayout(view, params)
@@ -87,8 +99,8 @@ class OverlayService : Service() {
         timerTextView = overlayView?.findViewById<TextView>(R.id.timerText)?.apply {
             textSize = Constants.calculateTextSize(buttonSize)
             alpha = buttonAlpha
+            setBackgroundColor(buttonColor.toArgb())
         }
-
         params = WindowManager.LayoutParams(
             sizeInPixels,
             sizeInPixels,
@@ -103,8 +115,10 @@ class OverlayService : Service() {
 
         rootView = newRootView
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
-        dragHandle?.setBackgroundResource(R.drawable.round_button)
+        dragHandle?.setBackgroundResource(R.drawable.round_button_teal)
         dragHandle?.background?.alpha = (buttonAlpha * 255).toInt()
+
+//        updateButtonBorder()
 
         var isMoved = false
 
@@ -169,6 +183,43 @@ class OverlayService : Service() {
             overlayView = null
         }
     }
+
+    private fun updateButtonBorder() {
+        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle) ?: return
+
+        val grayColor = ContextCompat.getColor(this, R.color.gray)
+        val tealColor = ContextCompat.getColor(this, R.color.teal)
+        val orangeColor = ContextCompat.getColor(this, R.color.orange)
+
+        // Debug color matching
+        val colorMatches = when (buttonColor.toArgb()) {
+            grayColor -> "MATCHED GRAY"
+            tealColor -> "MATCHED TEAL"
+            orangeColor -> "MATCHED ORANGE"
+            else -> "NO MATCH: ${buttonColor.toArgb()}"
+        }
+
+        Log.d("OverlayService", "Color matching: $colorMatches")
+        Log.d("OverlayService", "Gray: $grayColor, Teal: $tealColor, Orange: $orangeColor, Button: ${buttonColor.toArgb()}")
+
+        // Determine which drawable to use
+        val backgroundResId = when (buttonColor.toArgb()) {
+            grayColor -> R.drawable.round_button_gray
+            tealColor -> R.drawable.round_button_teal
+            orangeColor -> R.drawable.round_button_orange
+            else -> R.drawable.round_button_gray
+        }
+
+        // Apply the drawable
+        dragHandle.setBackgroundResource(backgroundResId)
+
+        // Force refresh of the view
+        dragHandle.invalidate()
+
+        // Set alpha
+        dragHandle.background.alpha = (buttonAlpha * 255).toInt()
+
+    }
 }
 
 class DraggableFrameLayout : FrameLayout {
@@ -185,3 +236,4 @@ class DraggableFrameLayout : FrameLayout {
         return true
     }
 }
+

@@ -8,9 +8,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +36,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import com.jzheng23.floattimer.Constants.MAX_BUTTON_SIZE
 import com.jzheng23.floattimer.Constants.MIN_BUTTON_SIZE
@@ -48,6 +54,7 @@ fun HomeScreen() {
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
     var buttonAlpha by remember { mutableFloatStateOf(1f) }
+    var buttonColor by remember { mutableStateOf(Color.Transparent) }
 
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -60,6 +67,7 @@ fun HomeScreen() {
             val intent = Intent(context, OverlayService::class.java).apply {
                 putExtra("BUTTON_SIZE", buttonSize.toInt())
                 putExtra("BUTTON_ALPHA", buttonAlpha)
+                putExtra("BUTTON_COLOR", buttonColor.toArgb())
             }
             context.startService(intent)
         }
@@ -94,6 +102,14 @@ fun HomeScreen() {
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        ColorPicker(
+            selectedColor = buttonColor,
+            onColorSelected = { color ->
+                buttonColor = color
+                startOverlayService()
+            }
+        )
 
         Text(
             "Button size: ${buttonSize.toInt()}dp",
@@ -133,7 +149,8 @@ fun HomeScreen() {
 
         OverlayButtonPreview(
             buttonSize = buttonSize.toInt(),
-            buttonAlpha = buttonAlpha
+            buttonAlpha = buttonAlpha,
+            buttonColor = buttonColor
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -169,20 +186,26 @@ fun PermissionSwitch(
 @Composable
 fun OverlayButtonPreview(
     buttonSize: Int = DEFAULT_BUTTON_SIZE,
-    buttonAlpha: Float = 1f
+    buttonAlpha: Float = 1f,
+    buttonColor: Color = Color.Transparent
 ) {
+    // Inside your composable or where you have context available
+    val context = LocalContext.current
+//    val textColor = Color(ContextCompat.getColor(context, R.color.text_color))
+    val backgroundColor = Color(ContextCompat.getColor(context, R.color.background_color))
+//    val borderColor = Color(ContextCompat.getColor(context, R.color.border_color))
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(vertical = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
             Column {
                 Text("Light background:", style = MaterialTheme.typography.labelMedium)
                 Box(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(150.dp)
                         .background(Color.White)
                 ) {
                     Box(
@@ -194,19 +217,19 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color.Transparent,
+                                    color = backgroundColor.copy(alpha = 0.2f * buttonAlpha),
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x88888888).copy(alpha = 0.4f * buttonAlpha),
+                                    color = buttonColor.copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0x88888888).copy(alpha = buttonAlpha),
+                            color = buttonColor.copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
@@ -217,7 +240,7 @@ fun OverlayButtonPreview(
                 Text("Dark background:", style = MaterialTheme.typography.labelMedium)
                 Box(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(150.dp)
                         .background(Color.Black)
                 ) {
                     Box(
@@ -229,19 +252,19 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = Color.Transparent,
+                                    color = backgroundColor.copy(alpha = 0.2f * buttonAlpha),
                                     shape = CircleShape
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = Color(0x88888888).copy(alpha = 0.4f * buttonAlpha),
+                                    color = buttonColor.copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = Color(0x88888888).copy(alpha = buttonAlpha),
+                            color = buttonColor.copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
@@ -255,4 +278,78 @@ fun OverlayButtonPreview(
 @Composable
 fun HomeScreenPreview() {
     HomeScreen()
+}
+
+@Composable
+fun ColorPicker(
+    selectedColor: Color,
+    onColorSelected: (Color) -> Unit
+) {
+    val context = LocalContext.current
+    val grayColor = Color(ContextCompat.getColor(context, R.color.gray))
+    val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
+    val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
+
+    val colors = listOf(
+        grayColor to "gray",
+        tealColor to "teal",
+        orangeColor to "orange"
+    )
+
+
+    Column {
+        Text(
+            text = "Select a color",
+            style = MaterialTheme.typography.bodyLarge ,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            contentPadding = PaddingValues(horizontal = 1.dp)
+        ) {
+            items(colors.size) { index ->
+                val (color, name) = colors[index]
+                ColorOption(
+                    color = color,
+                    name = name,
+                    isSelected = color == selectedColor,
+                    onClick = {  onColorSelected(color) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorOption(
+    color: Color,
+    name: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(1.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(color, CircleShape)
+                .border(
+                    width = if (isSelected) 3.dp else 1.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+                    shape = CircleShape
+                )
+        )
+
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 1.dp)
+        )
+    }
 }

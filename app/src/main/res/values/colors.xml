@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <color name="gray">#FF888888</color>
+    <color name="background_color">#22888888</color>
+    <color name="border_color">#FF888888</color>
+    <color name="medium_blue">#FF0066CC</color>
+    <color name="teal">#FF00AAAA</color>
+    <color name="purple">#FF6600CC</color>
+    <color name="orange">#FFFF6600</color>
+    <color name="chartreuse">#FF88CC00</color>
+</resources>
