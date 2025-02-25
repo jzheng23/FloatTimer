@@ -72,7 +72,7 @@ class OverlayService : Service() {
                 setTextColor(buttonColor.toArgb())
             }
 
-//            updateButtonBorder()
+            updateButtonBorder()
 
             // Update in window manager
             rootView?.let { view ->
@@ -99,7 +99,7 @@ class OverlayService : Service() {
         timerTextView = overlayView?.findViewById<TextView>(R.id.timerText)?.apply {
             textSize = Constants.calculateTextSize(buttonSize)
             alpha = buttonAlpha
-            setBackgroundColor(buttonColor.toArgb())
+            setTextColor(buttonColor.toArgb())
         }
         params = WindowManager.LayoutParams(
             sizeInPixels,
@@ -118,7 +118,7 @@ class OverlayService : Service() {
         dragHandle?.setBackgroundResource(R.drawable.round_button_teal)
         dragHandle?.background?.alpha = (buttonAlpha * 255).toInt()
 
-//        updateButtonBorder()
+        updateButtonBorder()
 
         var isMoved = false
 
@@ -185,40 +185,31 @@ class OverlayService : Service() {
     }
 
     private fun updateButtonBorder() {
-        val dragHandle = overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle) ?: return
-
-        val grayColor = ContextCompat.getColor(this, R.color.gray)
-        val tealColor = ContextCompat.getColor(this, R.color.teal)
-        val orangeColor = ContextCompat.getColor(this, R.color.orange)
-
-        // Debug color matching
-        val colorMatches = when (buttonColor.toArgb()) {
-            grayColor -> "MATCHED GRAY"
-            tealColor -> "MATCHED TEAL"
-            orangeColor -> "MATCHED ORANGE"
-            else -> "NO MATCH: ${buttonColor.toArgb()}"
-        }
-
-        Log.d("OverlayService", "Color matching: $colorMatches")
-        Log.d("OverlayService", "Gray: $grayColor, Teal: $tealColor, Orange: $orangeColor, Button: ${buttonColor.toArgb()}")
+        val backgroundView = overlayView?.findViewById<View>(R.id.backgroundView) ?: return
+        val timerText = overlayView?.findViewById<TextView>(R.id.timerText) ?: return
 
         // Determine which drawable to use
         val backgroundResId = when (buttonColor.toArgb()) {
-            grayColor -> R.drawable.round_button_gray
-            tealColor -> R.drawable.round_button_teal
-            orangeColor -> R.drawable.round_button_orange
+            ContextCompat.getColor(this, R.color.gray) -> R.drawable.round_button_gray
+            ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
+            ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
             else -> R.drawable.round_button_gray
         }
 
-        // Apply the drawable
-        dragHandle.setBackgroundResource(backgroundResId)
+        // Set the background resource on the background view
+        backgroundView.setBackgroundResource(backgroundResId)
 
-        // Force refresh of the view
-        dragHandle.invalidate()
+        // Apply alpha to the entire background view
+        backgroundView.alpha = buttonAlpha
 
-        // Set alpha
-        dragHandle.background.alpha = (buttonAlpha * 255).toInt()
+        // CRITICAL: Explicitly clear any background from the text view
+        timerText.background = null
 
+        // Update text color
+        timerText.setTextColor(buttonColor.toArgb())
+
+        // Make sure text is on top
+        timerText.bringToFront()
     }
 }
 
