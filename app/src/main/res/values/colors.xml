@@ -8,4 +8,6 @@
     <color name="purple">#FF6600CC</color>
     <color name="orange">#FFFF6600</color>
     <color name="chartreuse">#FF88CC00</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

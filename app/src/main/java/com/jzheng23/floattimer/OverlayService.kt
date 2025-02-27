@@ -4,10 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
-import android.graphics.drawable.GradientDrawable
 import android.os.IBinder
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -193,6 +191,7 @@ class OverlayService : Service() {
             ContextCompat.getColor(this, R.color.gray) -> R.drawable.round_button_gray
             ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
             ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
+            ContextCompat.getColor(this, R.color.black) -> R.drawable.round_button_black
             else -> R.drawable.round_button_gray
         }
 

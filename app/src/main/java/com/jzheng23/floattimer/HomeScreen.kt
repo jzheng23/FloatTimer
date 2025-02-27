@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -192,7 +191,7 @@ fun OverlayButtonPreview(
     // Inside your composable or where you have context available
     val context = LocalContext.current
 //    val textColor = Color(ContextCompat.getColor(context, R.color.text_color))
-    val backgroundColor = Color(ContextCompat.getColor(context, R.color.background_color))
+    val backgroundColor = if (buttonColor != Color.Black) Color(ContextCompat.getColor(context, R.color.background_color)) else Color.White
 //    val borderColor = Color(ContextCompat.getColor(context, R.color.border_color))
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
@@ -289,11 +288,13 @@ fun ColorPicker(
     val grayColor = Color(ContextCompat.getColor(context, R.color.gray))
     val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
     val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
+    val blackColor = Color(ContextCompat.getColor(context, R.color.black))
 
     val colors = listOf(
         grayColor to "gray",
         tealColor to "teal",
-        orangeColor to "orange"
+        orangeColor to "orange",
+        blackColor to "black"
     )
 
 
