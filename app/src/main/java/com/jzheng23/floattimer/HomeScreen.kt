@@ -191,7 +191,17 @@ fun OverlayButtonPreview(
     // Inside your composable or where you have context available
     val context = LocalContext.current
 //    val textColor = Color(ContextCompat.getColor(context, R.color.text_color))
-    val backgroundColor = if (buttonColor != Color.Black) Color(ContextCompat.getColor(context, R.color.background_color)) else Color.White
+    val backgroundColor = when (buttonColor) {
+        Color.Black -> {
+            Color.White
+        }
+        Color.White -> {
+            Color.Black
+        }
+        else -> {
+            Color(ContextCompat.getColor(context, R.color.background_color))
+        }
+    }
 //    val borderColor = Color(ContextCompat.getColor(context, R.color.border_color))
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
@@ -289,12 +299,14 @@ fun ColorPicker(
     val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
     val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
     val blackColor = Color(ContextCompat.getColor(context, R.color.black))
+    val whiteColor = Color(ContextCompat.getColor(context, R.color.white))
 
     val colors = listOf(
         grayColor to "gray",
         tealColor to "teal",
         orangeColor to "orange",
-        blackColor to "black"
+        blackColor to "black",
+        whiteColor to "white"
     )
 
 

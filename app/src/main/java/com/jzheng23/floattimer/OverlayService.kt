@@ -192,6 +192,7 @@ class OverlayService : Service() {
             ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
             ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
             ContextCompat.getColor(this, R.color.black) -> R.drawable.round_button_black
+            ContextCompat.getColor(this, R.color.white) -> R.drawable.round_button_white
             else -> R.drawable.round_button_gray
         }
 
