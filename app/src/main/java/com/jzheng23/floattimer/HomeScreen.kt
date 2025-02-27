@@ -191,9 +191,9 @@ fun OverlayButtonPreview(
     // Inside your composable or where you have context available
     val context = LocalContext.current
 //    val textColor = Color(ContextCompat.getColor(context, R.color.text_color))
-    val backgroundColor = when (buttonColor) {
-        Color.White -> Color.Black
-        Color.Black -> Color.White
+    val backgroundColor = when (buttonColor.toArgb() and 0xFFFFFF) {
+        0xFFFFFF -> Color.Black // If white (ignoring alpha)
+        0x000000 -> Color.White // If black (ignoring alpha)
         else -> Color(ContextCompat.getColor(context, R.color.background_color))
     }
 //        Color(ContextCompat.getColor(context, R.color.background_color))
@@ -221,7 +221,12 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = backgroundColor.copy(alpha = 0.2f * buttonAlpha),
+                                    color = when {
+                                        backgroundColor == Color.White || backgroundColor == Color.Black ->
+                                            backgroundColor.copy(alpha = buttonAlpha)
+                                        else ->
+                                            backgroundColor.copy(alpha = 0.2f * buttonAlpha)
+                                    },
                                     shape = CircleShape
                                 )
                                 .border(
@@ -256,7 +261,12 @@ fun OverlayButtonPreview(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    color = backgroundColor.copy(alpha = 0.2f * buttonAlpha),
+                                    color = when {
+                                        backgroundColor == Color.White || backgroundColor == Color.Black ->
+                                            backgroundColor.copy(alpha = buttonAlpha)
+                                        else ->
+                                            backgroundColor.copy(alpha = 0.2f * buttonAlpha)
+                                    },
                                     shape = CircleShape
                                 )
                                 .border(
