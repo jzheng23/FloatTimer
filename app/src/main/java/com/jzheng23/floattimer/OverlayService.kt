@@ -34,7 +34,6 @@ class OverlayService : Service() {
     private var numberInBubble = 0
     private var buttonSize = DEFAULT_BUTTON_SIZE
     private var buttonAlpha = 1f
-    private var buttonColor = Color.Gray
     private var rootView: FrameLayout? = null
 
     override fun onCreate() {
@@ -45,9 +44,7 @@ class OverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         buttonSize = intent?.getIntExtra("BUTTON_SIZE", DEFAULT_BUTTON_SIZE) ?: DEFAULT_BUTTON_SIZE
         buttonAlpha = intent?.getFloatExtra("BUTTON_ALPHA", 1f) ?: 1f
-        val buttonColorInt =
-            intent?.getIntExtra("BUTTON_COLOR", Color.Gray.toArgb()) ?: Color.Gray.toArgb()
-        buttonColor = Color(buttonColorInt)
+
 
         if (overlayView == null) {
             showOverlay()
@@ -67,10 +64,10 @@ class OverlayService : Service() {
             timerTextView?.apply {
                 textSize = Constants.calculateTextSize(buttonSize)
                 alpha = buttonAlpha // Add this line to update alpha
-                setTextColor(buttonColor.toArgb())
+                setTextColor(getColor(R.color.gray))
             }
 
-            updateButtonBorder()
+//            updateButtonBorder()
 
             // Update in window manager
             rootView?.let { view ->
@@ -97,7 +94,7 @@ class OverlayService : Service() {
         timerTextView = overlayView?.findViewById<TextView>(R.id.timerText)?.apply {
             textSize = Constants.calculateTextSize(buttonSize)
             alpha = buttonAlpha
-            setTextColor(buttonColor.toArgb())
+            setTextColor(getColor(R.color.gray))
         }
         params = WindowManager.LayoutParams(
             sizeInPixels,
@@ -116,7 +113,7 @@ class OverlayService : Service() {
         dragHandle?.setBackgroundResource(R.drawable.round_button_teal)
         dragHandle?.background?.alpha = (buttonAlpha * 255).toInt()
 
-        updateButtonBorder()
+//        updateButtonBorder()
 
         var isMoved = false
 
@@ -182,35 +179,35 @@ class OverlayService : Service() {
         }
     }
 
-    private fun updateButtonBorder() {
-        val backgroundView = overlayView?.findViewById<View>(R.id.backgroundView) ?: return
-        val timerText = overlayView?.findViewById<TextView>(R.id.timerText) ?: return
-
-        // Determine which drawable to use
-        val backgroundResId = when (buttonColor.toArgb()) {
-            ContextCompat.getColor(this, R.color.gray) -> R.drawable.round_button_gray
-            ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
-            ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
-            ContextCompat.getColor(this, R.color.black) -> R.drawable.round_button_black
-            ContextCompat.getColor(this, R.color.white) -> R.drawable.round_button_white
-            else -> R.drawable.round_button_gray
-        }
-
-        // Set the background resource on the background view
-        backgroundView.setBackgroundResource(backgroundResId)
-
-        // Apply alpha to the entire background view
-        backgroundView.alpha = buttonAlpha
-
-        // CRITICAL: Explicitly clear any background from the text view
-        timerText.background = null
-
-        // Update text color
-        timerText.setTextColor(buttonColor.toArgb())
-
-        // Make sure text is on top
-        timerText.bringToFront()
-    }
+//    private fun updateButtonBorder() {
+//        val backgroundView = overlayView?.findViewById<View>(R.id.backgroundView) ?: return
+//        val timerText = overlayView?.findViewById<TextView>(R.id.timerText) ?: return
+//
+//        // Determine which drawable to use
+//        val backgroundResId = when (buttonColor.toArgb()) {
+//            ContextCompat.getColor(this, R.color.gray) -> R.drawable.round_button_gray
+//            ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
+//            ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
+//            ContextCompat.getColor(this, R.color.black) -> R.drawable.round_button_black
+//            ContextCompat.getColor(this, R.color.white) -> R.drawable.round_button_white
+//            else -> R.drawable.round_button_gray
+//        }
+//
+//        // Set the background resource on the background view
+//        backgroundView.setBackgroundResource(backgroundResId)
+//
+//        // Apply alpha to the entire background view
+//        backgroundView.alpha = buttonAlpha
+//
+//        // CRITICAL: Explicitly clear any background from the text view
+//        timerText.background = null
+//
+//        // Update text color
+//        timerText.setTextColor(buttonColor.toArgb())
+//
+//        // Make sure text is on top
+//        timerText.bringToFront()
+//    }
 }
 
 class DraggableFrameLayout : FrameLayout {

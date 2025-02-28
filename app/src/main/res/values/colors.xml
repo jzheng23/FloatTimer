@@ -2,7 +2,6 @@
 <resources>
     <color name="gray">#FF888888</color>
     <color name="background_color">#22888888</color>
-    <color name="border_color">#FF888888</color>
     <color name="medium_blue">#FF0066CC</color>
     <color name="teal">#FF00AAAA</color>
     <color name="purple">#FF6600CC</color>

@@ -53,7 +53,7 @@ fun HomeScreen() {
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
     var buttonAlpha by remember { mutableFloatStateOf(1f) }
-    var buttonColor by remember { mutableStateOf(Color.Transparent) }
+//    var buttonColor by remember { mutableStateOf(Color.Transparent) }
 
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -66,7 +66,7 @@ fun HomeScreen() {
             val intent = Intent(context, OverlayService::class.java).apply {
                 putExtra("BUTTON_SIZE", buttonSize.toInt())
                 putExtra("BUTTON_ALPHA", buttonAlpha)
-                putExtra("BUTTON_COLOR", buttonColor.toArgb())
+//                putExtra("BUTTON_COLOR", buttonColor.toArgb())
             }
             context.startService(intent)
         }
@@ -102,13 +102,13 @@ fun HomeScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        ColorPicker(
-            selectedColor = buttonColor,
-            onColorSelected = { color ->
-                buttonColor = color
-                startOverlayService()
-            }
-        )
+//        ColorPicker(
+//            selectedColor = buttonColor,
+//            onColorSelected = { color ->
+//                buttonColor = color
+//                startOverlayService()
+//            }
+//        )
 
         Text(
             "Button size: ${buttonSize.toInt()}dp",
@@ -149,7 +149,7 @@ fun HomeScreen() {
         OverlayButtonPreview(
             buttonSize = buttonSize.toInt(),
             buttonAlpha = buttonAlpha,
-            buttonColor = buttonColor
+//            buttonColor = buttonColor
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -186,18 +186,15 @@ fun PermissionSwitch(
 fun OverlayButtonPreview(
     buttonSize: Int = DEFAULT_BUTTON_SIZE,
     buttonAlpha: Float = 1f,
-    buttonColor: Color = Color.Transparent
+//    buttonColor: Color = Color.Transparent
 ) {
     // Inside your composable or where you have context available
     val context = LocalContext.current
-//    val textColor = Color(ContextCompat.getColor(context, R.color.text_color))
-    val backgroundColor = when (buttonColor.toArgb() and 0xFFFFFF) {
-        0xFFFFFF -> Color.Black // If white (ignoring alpha)
-        0x000000 -> Color.White // If black (ignoring alpha)
-        else -> Color(ContextCompat.getColor(context, R.color.background_color))
-    }
+    val textColor = Color(ContextCompat.getColor(context, R.color.gray))
+    val backgroundColor = Color(ContextCompat.getColor(context, R.color.background_color))
+
 //        Color(ContextCompat.getColor(context, R.color.background_color))
-//    val borderColor = Color(ContextCompat.getColor(context, R.color.border_color))
+    val borderColor = Color(ContextCompat.getColor(context, R.color.gray))
     Column(
         modifier = Modifier.padding(vertical = 16.dp)
     ) {
@@ -231,14 +228,14 @@ fun OverlayButtonPreview(
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = buttonColor.copy(alpha = 0.4f * buttonAlpha),
+                                    color = borderColor.copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = buttonColor.copy(alpha = buttonAlpha),
+                            color = textColor.copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
@@ -271,14 +268,14 @@ fun OverlayButtonPreview(
                                 )
                                 .border(
                                     width = 1.dp,
-                                    color = buttonColor.copy(alpha = 0.4f * buttonAlpha),
+                                    color = borderColor.copy(alpha = 0.4f * buttonAlpha),
                                     shape = CircleShape
                                 )
                         )
                         Text(
                             "99",
                             modifier = Modifier.align(Alignment.Center),
-                            color = buttonColor.copy(alpha = buttonAlpha),
+                            color = textColor.copy(alpha = buttonAlpha),
                             fontSize = Constants.calculateTextSize(buttonSize).sp
                         )
                     }
@@ -294,80 +291,80 @@ fun HomeScreenPreview() {
     HomeScreen()
 }
 
-@Composable
-fun ColorPicker(
-    selectedColor: Color,
-    onColorSelected: (Color) -> Unit
-) {
-    val context = LocalContext.current
-    val grayColor = Color(ContextCompat.getColor(context, R.color.gray))
-    val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
-    val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
-    val blackColor = Color(ContextCompat.getColor(context, R.color.black))
-    val whiteColor = Color(ContextCompat.getColor(context, R.color.white))
-
-    val colors = listOf(
-        grayColor to "gray",
-        tealColor to "teal",
-        orangeColor to "orange",
-        blackColor to "black",
-        whiteColor to "white"
-    )
-
-
-    Column {
-        Text(
-            text = "Select a color",
-            style = MaterialTheme.typography.bodyLarge ,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            contentPadding = PaddingValues(horizontal = 1.dp)
-        ) {
-            items(colors.size) { index ->
-                val (color, name) = colors[index]
-                ColorOption(
-                    color = color,
-                    name = name,
-                    isSelected = color == selectedColor,
-                    onClick = {  onColorSelected(color) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ColorOption(
-    color: Color,
-    name: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(1.dp)
-            .clickable(onClick = onClick)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(color, CircleShape)
-                .border(
-                    width = if (isSelected) 3.dp else 1.dp,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
-                    shape = CircleShape
-                )
-        )
-
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 1.dp)
-        )
-    }
-}
+//@Composable
+//fun ColorPicker(
+//    selectedColor: Color,
+//    onColorSelected: (Color) -> Unit
+//) {
+//    val context = LocalContext.current
+//    val grayColor = Color(ContextCompat.getColor(context, R.color.gray))
+//    val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
+//    val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
+//    val blackColor = Color(ContextCompat.getColor(context, R.color.black))
+//    val whiteColor = Color(ContextCompat.getColor(context, R.color.white))
+//
+//    val colors = listOf(
+//        grayColor to "gray",
+//        tealColor to "teal",
+//        orangeColor to "orange",
+//        blackColor to "black",
+//        whiteColor to "white"
+//    )
+//
+//
+//    Column {
+//        Text(
+//            text = "Select a color",
+//            style = MaterialTheme.typography.bodyLarge ,
+//            modifier = Modifier.padding(bottom = 8.dp)
+//        )
+//
+//        LazyRow(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceEvenly,
+//            contentPadding = PaddingValues(horizontal = 1.dp)
+//        ) {
+//            items(colors.size) { index ->
+//                val (color, name) = colors[index]
+//                ColorOption(
+//                    color = color,
+//                    name = name,
+//                    isSelected = color == selectedColor,
+//                    onClick = {  onColorSelected(color) }
+//                )
+//            }
+//        }
+//    }
+//}
+//
+//@Composable
+//private fun ColorOption(
+//    color: Color,
+//    name: String,
+//    isSelected: Boolean,
+//    onClick: () -> Unit
+//) {
+//    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        modifier = Modifier
+//            .padding(1.dp)
+//            .clickable(onClick = onClick)
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .size(48.dp)
+//                .background(color, CircleShape)
+//                .border(
+//                    width = if (isSelected) 3.dp else 1.dp,
+//                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+//                    shape = CircleShape
+//                )
+//        )
+//
+//        Text(
+//            text = name,
+//            style = MaterialTheme.typography.bodySmall,
+//            modifier = Modifier.padding(top = 1.dp)
+//        )
+//    }
+//}
