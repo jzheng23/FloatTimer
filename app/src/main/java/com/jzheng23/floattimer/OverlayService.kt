@@ -169,7 +169,14 @@ class OverlayService : Service() {
         // Make button fully opaque
         buttonAlpha = 1f
 
-        // Update the UI to show the change
+        // Get the background view and change its background resource
+        val backgroundView = overlayView?.findViewById<View>(R.id.backgroundView)
+        // Save the original background drawable
+//        val originalBackground = backgroundView?.background
+        // Change to black background
+        backgroundView?.setBackgroundResource(R.drawable.round_button_black)
+
+        // Update the UI to show the alpha change
         overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
             alpha = 1f
         }
@@ -178,7 +185,7 @@ class OverlayService : Service() {
             alpha = 1f
         }
 
-        // Schedule a return to original transparency after 2 seconds
+        // Schedule a return to original transparency and background after 2 seconds
         Handler(Looper.getMainLooper()).postDelayed({
             // Restore original alpha
             buttonAlpha = originalAlpha
@@ -190,6 +197,9 @@ class OverlayService : Service() {
             timerTextView?.apply {
                 alpha = originalAlpha
             }
+
+            // Restore original background
+            backgroundView?.setBackgroundResource(R.drawable.round_button_gray)
         }, 2000) // 2000 milliseconds = 2 seconds
     }
 
