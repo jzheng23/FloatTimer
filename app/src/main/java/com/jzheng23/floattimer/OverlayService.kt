@@ -4,7 +4,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -15,7 +17,6 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.ContextCompat
 import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import kotlin.math.abs
 
@@ -31,7 +32,7 @@ class OverlayService : Service() {
     private var initialY: Int = 0
     private var initialTouchX: Float = 0f
     private var initialTouchY: Float = 0f
-    private var numberInBubble = 0
+//    private var numberInBubble = 0
     private var buttonSize = DEFAULT_BUTTON_SIZE
     private var buttonAlpha = 1f
     private var rootView: FrameLayout? = null
@@ -143,8 +144,9 @@ class OverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     if (!isMoved) {
                         view.performClick()
-                        numberInBubble++
-                        timerTextView?.text = String.format(numberInBubble.toString())
+                        makeFullyOpaqueTemporarily()
+//                        numberInBubble++
+//                        timerTextView?.text = String.format(numberInBubble.toString())
                     }
                     true
                 }
@@ -158,6 +160,37 @@ class OverlayService : Service() {
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
+    }
+
+    private fun makeFullyOpaqueTemporarily() {
+        // Save the current alpha value
+        val originalAlpha = buttonAlpha
+
+        // Make button fully opaque
+        buttonAlpha = 1f
+
+        // Update the UI to show the change
+        overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
+            alpha = 1f
+        }
+
+        timerTextView?.apply {
+            alpha = 1f
+        }
+
+        // Schedule a return to original transparency after 2 seconds
+        Handler(Looper.getMainLooper()).postDelayed({
+            // Restore original alpha
+            buttonAlpha = originalAlpha
+
+            overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
+                alpha = originalAlpha
+            }
+
+            timerTextView?.apply {
+                alpha = originalAlpha
+            }
+        }, 2000) // 2000 milliseconds = 2 seconds
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
