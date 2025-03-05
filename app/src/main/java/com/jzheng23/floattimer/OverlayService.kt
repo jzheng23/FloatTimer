@@ -18,6 +18,9 @@ import android.widget.TextView
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
+import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.math.abs
 
 class OverlayService : Service() {
@@ -34,8 +37,10 @@ class OverlayService : Service() {
     private var initialTouchY: Float = 0f
 //    private var numberInBubble = 0
     private var buttonSize = DEFAULT_BUTTON_SIZE
-    private var buttonAlpha = 1f
+    private var buttonAlpha = 0.25f
     private var rootView: FrameLayout? = null
+    private var timer: Timer? = null
+    private var counterValue = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -97,6 +102,11 @@ class OverlayService : Service() {
             alpha = buttonAlpha
             setTextColor(getColor(R.color.gray))
         }
+
+        // Add this after setting up timerTextView
+        timerTextView?.text = "0" // Start with 0
+        startCounter()
+
         params = WindowManager.LayoutParams(
             sizeInPixels,
             sizeInPixels,
@@ -111,7 +121,7 @@ class OverlayService : Service() {
 
         rootView = newRootView
         overlayView?.setBackgroundColor(Color.Transparent.toArgb())
-        dragHandle?.setBackgroundResource(R.drawable.round_button_teal)
+        dragHandle?.setBackgroundResource(R.drawable.round_button_gray)
         dragHandle?.background?.alpha = (buttonAlpha * 255).toInt()
 
 //        updateButtonBorder()
@@ -203,9 +213,57 @@ class OverlayService : Service() {
         }, 2000) // 2000 milliseconds = 2 seconds
     }
 
+    private fun startCounter() {
+        // Cancel any existing timer
+        timer?.cancel()
+
+        // Reset counter to 0
+        counterValue = 0
+        timerTextView?.text = String.format(Locale.getDefault(), "%d", counterValue)
+        // Create new timer that schedules the next task after each completion
+        timer = Timer()
+        scheduleNextTimer()
+    }
+
+    private fun scheduleNextTimer() {
+        timer?.schedule(object : TimerTask() {
+            override fun run() {
+                // Increment counter
+                counterValue++
+
+                // Calculate new alpha based on time
+                // This will gradually increase opacity (decrease transparency)
+                // You can adjust the formula to control the rate of change
+                val newAlpha = minOf(1f, buttonAlpha + 0.02f * counterValue)
+
+                // Update UI on main thread
+                Handler(Looper.getMainLooper()).post {
+                    timerTextView?.text = String.format(Locale.getDefault(),"%d", counterValue)
+
+                    // Apply the new alpha to the views
+                    overlayView?.findViewById<DraggableFrameLayout>(R.id.dragHandle)?.apply {
+                        alpha = newAlpha
+                    }
+
+                    timerTextView?.apply {
+                        alpha = newAlpha
+                    }
+
+                    // Update the buttonAlpha property to keep track of current alpha
+                    buttonAlpha = newAlpha
+
+                    // Schedule next update after this one completes
+                    scheduleNextTimer()
+                }
+            }
+        }, 2000) // Run after 2 seconds
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        timer?.cancel()
+        timer = null
         super.onDestroy()
         removeOverlay()
     }
@@ -222,35 +280,6 @@ class OverlayService : Service() {
         }
     }
 
-//    private fun updateButtonBorder() {
-//        val backgroundView = overlayView?.findViewById<View>(R.id.backgroundView) ?: return
-//        val timerText = overlayView?.findViewById<TextView>(R.id.timerText) ?: return
-//
-//        // Determine which drawable to use
-//        val backgroundResId = when (buttonColor.toArgb()) {
-//            ContextCompat.getColor(this, R.color.gray) -> R.drawable.round_button_gray
-//            ContextCompat.getColor(this, R.color.teal) -> R.drawable.round_button_teal
-//            ContextCompat.getColor(this, R.color.orange) -> R.drawable.round_button_orange
-//            ContextCompat.getColor(this, R.color.black) -> R.drawable.round_button_black
-//            ContextCompat.getColor(this, R.color.white) -> R.drawable.round_button_white
-//            else -> R.drawable.round_button_gray
-//        }
-//
-//        // Set the background resource on the background view
-//        backgroundView.setBackgroundResource(backgroundResId)
-//
-//        // Apply alpha to the entire background view
-//        backgroundView.alpha = buttonAlpha
-//
-//        // CRITICAL: Explicitly clear any background from the text view
-//        timerText.background = null
-//
-//        // Update text color
-//        timerText.setTextColor(buttonColor.toArgb())
-//
-//        // Make sure text is on top
-//        timerText.bringToFront()
-//    }
 }
 
 class DraggableFrameLayout : FrameLayout {

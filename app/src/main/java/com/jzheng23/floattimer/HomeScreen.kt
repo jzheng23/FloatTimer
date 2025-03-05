@@ -52,7 +52,7 @@ fun HomeScreen() {
     val context = LocalContext.current
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
-    var buttonAlpha by remember { mutableFloatStateOf(1f) }
+    var buttonAlpha by remember { mutableFloatStateOf(0.25f) }
 //    var buttonColor by remember { mutableStateOf(Color.Transparent) }
 
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
