@@ -1,13 +1,16 @@
 package com.jzheng23.floattimer
 
 import android.app.Service
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.Process
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -19,12 +22,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import java.util.Locale
+import java.util.SortedMap
 import java.util.Timer
 import java.util.TimerTask
+import java.util.TreeMap
 import kotlin.math.abs
 
 class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
+    private lateinit var usageStatsManager: UsageStatsManager
+    private var lastAlphaUpdateTime = 0L
+
     private var overlayView: View? = null
     private var timerTextView: TextView? = null
 
@@ -45,6 +53,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -225,6 +234,37 @@ class OverlayService : Service() {
         scheduleNextTimer()
     }
 
+
+    // Add this method to check for permission
+    private fun hasUsageStatsPermission(): Boolean {
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as android.app.AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+            Process.myUid(), packageName
+        )
+        return mode == android.app.AppOpsManager.MODE_ALLOWED
+    }
+
+    // Get the current foreground app package name
+    private fun getForegroundApp(): String? {
+        if (!hasUsageStatsPermission()) return null
+
+        val time = System.currentTimeMillis()
+        // Get usage stats for the last 10 seconds
+        val stats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY, time - 10000, time
+        )
+
+        if (stats.isEmpty()) return null
+
+        val sortedMap: SortedMap<Long, String> = TreeMap()
+        for (usageStats in stats) {
+            sortedMap[usageStats.lastTimeUsed] = usageStats.packageName
+        }
+
+        return if (sortedMap.isNotEmpty()) sortedMap[sortedMap.lastKey()] else null
+    }
+
     private fun scheduleNextTimer() {
         timer?.schedule(object : TimerTask() {
             override fun run() {
@@ -234,7 +274,24 @@ class OverlayService : Service() {
                 // Calculate new alpha based on time
                 // This will gradually increase opacity (decrease transparency)
                 // You can adjust the formula to control the rate of change
-                val newAlpha = minOf(1f, buttonAlpha + 0.02f * counterValue)
+                val currentApp = getForegroundApp()
+                Log.d("ForegroundApp", "Current app: $currentApp")
+
+                // Calculate new alpha based on which app is in foreground
+                val newAlpha = when (currentApp) {
+                    "com.google.android.gm" -> { // Gmail
+                        // Gradually increase transparency (decrease alpha)
+                        maxOf(0.1f, buttonAlpha - 0.2f)
+                    }
+                    "com.twitter.android", "com.twitter.android.lite", "com.x.android" -> { // X (Twitter)
+                        // Gradually decrease transparency (increase alpha)
+                        minOf(1f, buttonAlpha + 0.2f)
+                    }
+                    else -> {
+                        // Keep current transparency for other apps
+                        buttonAlpha
+                    }
+                }
 
                 // Update UI on main thread
                 Handler(Looper.getMainLooper()).post {

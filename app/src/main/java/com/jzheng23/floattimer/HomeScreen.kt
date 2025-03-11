@@ -1,6 +1,7 @@
 package com.jzheng23.floattimer
 
-
+import android.app.usage.UsageStatsManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -8,11 +9,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,11 +43,27 @@ import com.jzheng23.floattimer.Constants.DEFAULT_BUTTON_SIZE
 import com.jzheng23.floattimer.Constants.MAX_BUTTON_SIZE
 import com.jzheng23.floattimer.Constants.MIN_BUTTON_SIZE
 
-
+// First, move the function outside the composable
+private fun hasUsageStatsPermission(context: Context): Boolean {
+    return try {
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val time = System.currentTimeMillis()
+        // Query for usage stats in the last minute
+        val stats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
+            time - 60000, time
+        )
+        // If we can get stats, permission is granted
+        stats != null && stats.isNotEmpty()
+    } catch (e: SecurityException) {
+        false
+    }
+}
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var usageStatsPermissionGranted by remember { mutableStateOf(hasUsageStatsPermission(context)) }
     var buttonSize by remember { mutableFloatStateOf(DEFAULT_BUTTON_SIZE.toFloat()) }
     var buttonAlpha by remember { mutableFloatStateOf(0.25f) }
 //    var buttonColor by remember { mutableStateOf(Color.Transparent) }
@@ -59,6 +72,12 @@ fun HomeScreen() {
         ActivityResultContracts.StartActivityForResult()
     ) {
         overlayPermissionGranted = Settings.canDrawOverlays(context)
+    }
+
+    val usageStatsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        usageStatsPermissionGranted = hasUsageStatsPermission(context)
     }
 
     fun startOverlayService() {
@@ -100,6 +119,18 @@ fun HomeScreen() {
             }
         )
 
+        // Add this to your UI
+        PermissionSwitch(
+            text = "Usage Stats Permission",
+            checked = usageStatsPermissionGranted,
+            onCheckedChange = { checked ->
+                if (checked) {
+                    val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                    usageStatsPermissionLauncher.launch(intent)
+                }
+            }
+        )
+
         Spacer(modifier = Modifier.height(32.dp))
 
 //        ColorPicker(
@@ -130,7 +161,7 @@ fun HomeScreen() {
 
         // Transparency slider
         Text(
-            "Button transparency: ${((1-buttonAlpha) * 100).toInt()}%",
+            "Button transparency: ${((1 - buttonAlpha) * 100).toInt()}%",
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(top = 16.dp)
         )
@@ -156,7 +187,7 @@ fun HomeScreen() {
 
         Button(
             onClick = { startOverlayService() },
-            enabled = overlayPermissionGranted
+            enabled = overlayPermissionGranted && usageStatsPermissionGranted
         ) {
             Text("Start the floating button")
         }
@@ -221,6 +252,7 @@ fun OverlayButtonPreview(
                                     color = when {
                                         backgroundColor == Color.White || backgroundColor == Color.Black ->
                                             backgroundColor.copy(alpha = buttonAlpha)
+
                                         else ->
                                             backgroundColor.copy(alpha = 0.2f * buttonAlpha)
                                     },
@@ -261,6 +293,7 @@ fun OverlayButtonPreview(
                                     color = when {
                                         backgroundColor == Color.White || backgroundColor == Color.Black ->
                                             backgroundColor.copy(alpha = buttonAlpha)
+
                                         else ->
                                             backgroundColor.copy(alpha = 0.2f * buttonAlpha)
                                     },
@@ -290,81 +323,3 @@ fun OverlayButtonPreview(
 fun HomeScreenPreview() {
     HomeScreen()
 }
-
-//@Composable
-//fun ColorPicker(
-//    selectedColor: Color,
-//    onColorSelected: (Color) -> Unit
-//) {
-//    val context = LocalContext.current
-//    val grayColor = Color(ContextCompat.getColor(context, R.color.gray))
-//    val tealColor = Color(ContextCompat.getColor(context, R.color.teal))
-//    val orangeColor = Color(ContextCompat.getColor(context, R.color.orange))
-//    val blackColor = Color(ContextCompat.getColor(context, R.color.black))
-//    val whiteColor = Color(ContextCompat.getColor(context, R.color.white))
-//
-//    val colors = listOf(
-//        grayColor to "gray",
-//        tealColor to "teal",
-//        orangeColor to "orange",
-//        blackColor to "black",
-//        whiteColor to "white"
-//    )
-//
-//
-//    Column {
-//        Text(
-//            text = "Select a color",
-//            style = MaterialTheme.typography.bodyLarge ,
-//            modifier = Modifier.padding(bottom = 8.dp)
-//        )
-//
-//        LazyRow(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceEvenly,
-//            contentPadding = PaddingValues(horizontal = 1.dp)
-//        ) {
-//            items(colors.size) { index ->
-//                val (color, name) = colors[index]
-//                ColorOption(
-//                    color = color,
-//                    name = name,
-//                    isSelected = color == selectedColor,
-//                    onClick = {  onColorSelected(color) }
-//                )
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//private fun ColorOption(
-//    color: Color,
-//    name: String,
-//    isSelected: Boolean,
-//    onClick: () -> Unit
-//) {
-//    Column(
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        modifier = Modifier
-//            .padding(1.dp)
-//            .clickable(onClick = onClick)
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .size(48.dp)
-//                .background(color, CircleShape)
-//                .border(
-//                    width = if (isSelected) 3.dp else 1.dp,
-//                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
-//                    shape = CircleShape
-//                )
-//        )
-//
-//        Text(
-//            text = name,
-//            style = MaterialTheme.typography.bodySmall,
-//            modifier = Modifier.padding(top = 1.dp)
-//        )
-//    }
-//}
