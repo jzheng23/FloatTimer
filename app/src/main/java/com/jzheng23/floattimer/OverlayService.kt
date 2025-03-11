@@ -246,23 +246,35 @@ class OverlayService : Service() {
     }
 
     // Get the current foreground app package name
+    private var lastDetectedApp: String? = null
+    private var lastChangeTime: Long = 0
+
     private fun getForegroundApp(): String? {
         if (!hasUsageStatsPermission()) return null
 
         val time = System.currentTimeMillis()
-        // Get usage stats for the last 10 seconds
         val stats = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY, time - 10000, time
+            UsageStatsManager.INTERVAL_BEST, time - 60000, time
         )
 
         if (stats.isEmpty()) return null
 
-        val sortedMap: SortedMap<Long, String> = TreeMap()
-        for (usageStats in stats) {
-            sortedMap[usageStats.lastTimeUsed] = usageStats.packageName
+        val launcherPackages = listOf(
+            "com.google.android.apps.nexuslauncher",
+        )
+
+        val currentApp = stats
+            .filter { it.packageName !in launcherPackages }
+            .maxByOrNull { it.lastTimeUsed }
+            ?.packageName
+
+        // If detected app is different from last one and not a launcher
+        if (currentApp != null && currentApp != lastDetectedApp && currentApp !in launcherPackages) {
+            lastDetectedApp = currentApp
+            lastChangeTime = time
         }
 
-        return if (sortedMap.isNotEmpty()) sortedMap[sortedMap.lastKey()] else null
+        return lastDetectedApp
     }
 
     private fun scheduleNextTimer() {
